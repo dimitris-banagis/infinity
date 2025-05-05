@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <title>Infinity Multiplier</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #000;
+      color: #0f0;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    #number {
+      font-size: 60px;
+      margin-bottom: 40px;
+    }
+
+    #status {
+      font-size: 20px;
+      color: #0ff;
+      margin-top: 20px;
+    }
+
+    button {
+      font-size: 20px;
+      margin: 10px;
+      padding: 15px 30px;
+      background-color: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #0c0;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="number">1</div>
+
+  <button onclick="multiply()">×2</button>
+  <button onclick="divide()">÷2</button>
+  <button onclick="reset()">Reset</button>
+  <button onclick="save()">💾 Save</button>
+  <button onclick="load()">📂 Load</button>
+  <button onclick="toggleAuto()">⏱ Auto ×2</button>
+
+  <div id="status">Auto OFF</div>
+
+  <script>
+    let current = 1;
+    let autoInterval = null;
+    const intervalSpeed = 1000; // σε milliseconds
+
+    function updateDisplay() {
+      document.getElementById("number").innerText = current.toLocaleString('en-US');
+    }
+
+    function multiply() {
+      current *= 2;
+      updateDisplay();
+    }
+
+    function divide() {
+      current /= 2;
+      updateDisplay();
+    }
+
+    function reset() {
+      current = 1;
+      updateDisplay();
+    }
+
+    function save() {
+      localStorage.setItem("savedValue", current);
+      alert("Αποθηκεύτηκε!");
+    }
+
+    function load() {
+      const saved = localStorage.getItem("savedValue");
+      if (saved !== null) {
+        current = parseFloat(saved);
+        updateDisplay();
+        alert("Φορτώθηκε!");
+      } else {
+        alert("Δεν υπάρχει αποθηκευμένη τιμή.");
+      }
+    }
+
+    function toggleAuto() {
+      const status = document.getElementById("status");
+      if (autoInterval === null) {
+        autoInterval = setInterval(() => {
+          multiply();
+        }, intervalSpeed);
+        status.innerText = `Auto ON: κάθε ${intervalSpeed}ms`;
+      } else {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        status.innerText = "Auto OFF";
+      }
+    }
+
+    window.onload = load;
+  </script>
+
+</body>
+</html>
