@@ -1,3 +1,9 @@
+# Δημιουργούμε ανανεωμένο HTML που περιλαμβάνει:
+# - προβολή με λέξεις (π.χ. 1 billion)
+# - input για να αλλάξεις πόσο γρήγορα τρέχει το auto multiplier
+# - κουμπί ενεργοποίησης auto με ρύθμιση ταχύτητας
+
+enhanced_html = """
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -14,13 +20,21 @@
 
     #number {
       font-size: 60px;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     #status {
       font-size: 20px;
       color: #0ff;
-      margin-top: 20px;
+      margin: 10px 0;
+    }
+
+    input {
+      font-size: 18px;
+      padding: 5px;
+      width: 100px;
+      margin: 5px;
+      text-align: center;
     }
 
     button {
@@ -49,6 +63,8 @@
   <button onclick="reset()">Reset</button>
   <button onclick="save()">💾 Save</button>
   <button onclick="load()">📂 Load</button>
+  <br>
+  <input id="intervalInput" type="number" min="100" value="1000"> ms
   <button onclick="toggleAuto()">⏱ Auto ×2</button>
 
   <div id="status">Auto OFF</div>
@@ -56,10 +72,20 @@
   <script>
     let current = 1;
     let autoInterval = null;
-    const intervalSpeed = 1000; // σε milliseconds
+
+    function formatNumber(num) {
+      if (num < 1e3) return num;
+      if (num < 1e6) return (num / 1e3).toFixed(2) + " thousand";
+      if (num < 1e9) return (num / 1e6).toFixed(2) + " million";
+      if (num < 1e12) return (num / 1e9).toFixed(2) + " billion";
+      if (num < 1e15) return (num / 1e12).toFixed(2) + " trillion";
+      if (num < 1e18) return (num / 1e15).toFixed(2) + " quadrillion";
+      if (num < 1e21) return (num / 1e18).toFixed(2) + " quintillion";
+      return num.toExponential(3);
+    }
 
     function updateDisplay() {
-      document.getElementById("number").innerText = current.toLocaleString('en-US');
+      document.getElementById("number").innerText = formatNumber(current);
     }
 
     function multiply() {
@@ -95,6 +121,14 @@
 
     function toggleAuto() {
       const status = document.getElementById("status");
+      const intervalInput = document.getElementById("intervalInput");
+      let intervalSpeed = parseInt(intervalInput.value);
+
+      if (isNaN(intervalSpeed) || intervalSpeed < 100) {
+        alert("Εισάγετε έγκυρο αριθμό (τουλάχιστον 100 ms)");
+        return;
+      }
+
       if (autoInterval === null) {
         autoInterval = setInterval(() => {
           multiply();
@@ -112,3 +146,11 @@
 
 </body>
 </html>
+"""
+
+# Αποθήκευση ως HTML αρχείο
+final_file_path = "/mnt/data/infinity_multiplier_full.html"
+with open(final_file_path, "w", encoding="utf-8") as f:
+    f.write(enhanced_html)
+
+final_file_path
