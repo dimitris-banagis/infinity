@@ -3,84 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <title>∞ Auto Multiplier Clicker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 0;
-      background: #000;
+      background-color: #000;
       color: #0f0;
       font-family: 'Courier New', monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
     }
 
     h1 {
-      margin-top: 40px;
-      font-size: 36px;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
     }
 
-    #display {
-      font-size: 32px;
+    #numberDisplay {
+      font-size: 1.5rem;
       margin: 20px 0;
-      word-break: break-all;
+      word-break: break-word;
       max-width: 90%;
       text-align: center;
     }
 
-    .button-group {
-      margin-top: 20px;
+    .buttons, .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
     }
 
-    button {
-      background: #111;
+    button, select {
+      padding: 10px 20px;
+      background-color: #111;
       color: #0f0;
       border: 1px solid #0f0;
-      font-size: 18px;
-      margin: 5px;
-      padding: 10px 20px;
+      font-size: 1rem;
       cursor: pointer;
-      transition: 0.2s;
+      transition: background-color 0.2s, color 0.2s;
     }
 
-    button:hover {
-      background: #0f0;
+    button:hover, select:hover {
+      background-color: #0f0;
       color: #000;
     }
 
-    .stats {
-      margin-top: 20px;
-      font-size: 16px;
+    label {
+      font-size: 1rem;
     }
 
-    .slider-container {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    input[type=range] {
-      width: 300px;
-    }
-
-    .log {
-      font-size: 12px;
+    footer {
+      margin-top: 30px;
+      font-size: 0.8rem;
       color: #444;
-      max-height: 100px;
-      overflow-y: auto;
-      width: 80%;
-      margin-top: 20px;
-      background: #111;
-      padding: 10px;
-      border: 1px solid #0f0;
     }
   </style>
 </head>
 <body>
 
-  <h1>∞ Auto Multiplier Clicker</h1>
-  <div id="display">1</div>
+  <h1>∞ AUTO MULTIPLIER CLICKER</h1>
+  <div id="numberDisplay">1</div>
 
-  <div class="button-group">
+  <div class="buttons">
     <button onclick="manualClick()">CLICK</button>
     <button onclick="doubleNow()">x2</button>
     <button onclick="reset()">RESET</button>
@@ -89,100 +81,74 @@
     </button>
   </div>
 
-  <div class="slider-container">
-    <label for="speedSlider">Auto Speed: <span id="speedLabel">Fast</span></label><br>
-    <input type="range" id="speedSlider" min="1" max="100" value="1">
+  <div class="controls">
+    <label for="speedSelect">Speed:</label>
+    <select id="speedSelect">
+      <option value="100">Ultra Fast ×100</option>
+      <option value="1000">Mega Fast ×1,000</option>
+      <option value="5000">Super Fast ×5,000</option>
+      <option value="10000">Hyper ×10,000</option>
+      <option value="100000">Insane ×100,000</option>
+      <option value="1000000">Overdrive ×1,000,000</option>
+    </select>
   </div>
 
-  <div class="stats">
-    <div>Auto Clicks/sec: <span id="cps">0</span></div>
-    <div>Total Clicks: <span id="clickCount">0</span></div>
-  </div>
-
-  <div class="log" id="logBox"></div>
-
-  <audio id="clickSound" src="https://freesound.org/data/previews/256/256113_3263906-lq.mp3" preload="auto"></audio>
+  <footer>
+    Infinite clicker | χωρίς όρια | φτιαγμένο με BigInt 🚀
+  </footer>
 
   <script>
-    let value = 1n;
-    let clickCount = 0;
+    let number = 1n;
     let autoRunning = false;
-    let autoInterval;
-    let autoCPS = 0;
-    let lastTime = Date.now();
+    let frame;
 
-    const display = document.getElementById("display");
-    const cpsDisplay = document.getElementById("cps");
-    const countDisplay = document.getElementById("clickCount");
-    const logBox = document.getElementById("logBox");
-    const clickSound = document.getElementById("clickSound");
+    const display = document.getElementById("numberDisplay");
+    const autoBtnLabel = document.getElementById("autoBtnLabel");
+    const speedSelect = document.getElementById("speedSelect");
 
     function updateDisplay() {
-      display.innerText = value.toString();
-      countDisplay.innerText = clickCount;
+      display.innerText = number.toString();
     }
 
     function manualClick() {
-      value *= 2n;
-      clickCount++;
+      number *= 2n;
       updateDisplay();
-      clickSound.currentTime = 0;
-      clickSound.play();
     }
 
     function doubleNow() {
-      value *= 2n;
+      number *= 2n;
       updateDisplay();
-      log("Doubled manually.");
     }
 
     function reset() {
-      value = 1n;
-      clickCount = 0;
+      number = 1n;
+      autoRunning = false;
+      cancelAnimationFrame(frame);
+      autoBtnLabel.textContent = "START AUTO";
       updateDisplay();
-      log("Reset to 1.");
-    }
-
-    function log(msg) {
-      const time = new Date().toLocaleTimeString();
-      logBox.innerHTML = `[${time}] ${msg}<br>` + logBox.innerHTML;
-    }
-
-    function getAutoDelay() {
-      const sliderVal = parseInt(document.getElementById("speedSlider").value);
-      document.getElementById("speedLabel").innerText = sliderVal <= 3 ? "Ultra Fast" :
-        sliderVal <= 10 ? "Fast" : sliderVal <= 50 ? "Normal" : "Slow";
-      return sliderVal;
-    }
-
-    function autoClickLoop() {
-      if (!autoRunning) return;
-
-      value *= 2n;
-      clickCount++;
-      autoCPS++;
-
-      updateDisplay();
-
-      setTimeout(autoClickLoop, getAutoDelay());
     }
 
     function toggleAutoClick() {
       autoRunning = !autoRunning;
-      document.getElementById("autoBtnLabel").innerText = autoRunning ? "STOP AUTO" : "START AUTO";
-
+      autoBtnLabel.textContent = autoRunning ? "STOP AUTO" : "START AUTO";
       if (autoRunning) {
-        autoCPS = 0;
-        setInterval(() => {
-          cpsDisplay.innerText = autoCPS;
-          autoCPS = 0;
-        }, 100000);
         autoClickLoop();
-        log("Started auto-clicking.");
       } else {
-        log("Stopped auto-clicking.");
+        cancelAnimationFrame(frame);
       }
     }
+
+    function autoClickLoop() {
+      if (!autoRunning) return;
+      const speed = parseInt(speedSelect.value);
+      for (let i = 0; i < speed; i++) {
+        number *= 2n;
+      }
+      updateDisplay();
+      frame = requestAnimationFrame(autoClickLoop);
+    }
+
+    updateDisplay();
   </script>
 
 </body>
