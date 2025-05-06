@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <title>∞ Auto Multiplier Clicker</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 40px;
+      font-size: 36px;
+    }
+
+    #display {
+      font-size: 32px;
+      margin: 20px 0;
+      word-break: break-all;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .button-group {
+      margin-top: 20px;
+    }
+
+    button {
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      font-size: 18px;
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0f0;
+      color: #000;
+    }
+
+    .stats {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .slider-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    input[type=range] {
+      width: 300px;
+    }
+
+    .log {
+      font-size: 12px;
+      color: #444;
+      max-height: 100px;
+      overflow-y: auto;
+      width: 80%;
+      margin-top: 20px;
+      background: #111;
+      padding: 10px;
+      border: 1px solid #0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>∞ Auto Multiplier Clicker</h1>
+  <div id="display">1</div>
+
+  <div class="button-group">
+    <button onclick="manualClick()">CLICK</button>
+    <button onclick="doubleNow()">x2</button>
+    <button onclick="reset()">RESET</button>
+    <button onclick="toggleAutoClick()">
+      <span id="autoBtnLabel">START AUTO</span>
+    </button>
+  </div>
+
+  <div class="slider-container">
+    <label for="speedSlider">Auto Speed: <span id="speedLabel">Fast</span></label><br>
+    <input type="range" id="speedSlider" min="1" max="100" value="1">
+  </div>
+
+  <div class="stats">
+    <div>Auto Clicks/sec: <span id="cps">0</span></div>
+    <div>Total Clicks: <span id="clickCount">0</span></div>
+  </div>
+
+  <div class="log" id="logBox"></div>
+
+  <audio id="clickSound" src="https://freesound.org/data/previews/256/256113_3263906-lq.mp3" preload="auto"></audio>
+
+  <script>
+    let value = 1n;
+    let clickCount = 0;
+    let autoRunning = false;
+    let autoInterval;
+    let autoCPS = 0;
+    let lastTime = Date.now();
+
+    const display = document.getElementById("display");
+    const cpsDisplay = document.getElementById("cps");
+    const countDisplay = document.getElementById("clickCount");
+    const logBox = document.getElementById("logBox");
+    const clickSound = document.getElementById("clickSound");
+
+    function updateDisplay() {
+      display.innerText = value.toString();
+      countDisplay.innerText = clickCount;
+    }
+
+    function manualClick() {
+      value *= 2n;
+      clickCount++;
+      updateDisplay();
+      clickSound.currentTime = 0;
+      clickSound.play();
+    }
+
+    function doubleNow() {
+      value *= 2n;
+      updateDisplay();
+      log("Doubled manually.");
+    }
+
+    function reset() {
+      value = 1n;
+      clickCount = 0;
+      updateDisplay();
+      log("Reset to 1.");
+    }
+
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      logBox.innerHTML = `[${time}] ${msg}<br>` + logBox.innerHTML;
+    }
+
+    function getAutoDelay() {
+      const sliderVal = parseInt(document.getElementById("speedSlider").value);
+      document.getElementById("speedLabel").innerText = sliderVal <= 3 ? "Ultra Fast" :
+        sliderVal <= 10 ? "Fast" : sliderVal <= 50 ? "Normal" : "Slow";
+      return sliderVal;
+    }
+
+    function autoClickLoop() {
+      if (!autoRunning) return;
+
+      value *= 2n;
+      clickCount++;
+      autoCPS++;
+
+      updateDisplay();
+
+      setTimeout(autoClickLoop, getAutoDelay());
+    }
+
+    function toggleAutoClick() {
+      autoRunning = !autoRunning;
+      document.getElementById("autoBtnLabel").innerText = autoRunning ? "STOP AUTO" : "START AUTO";
+
+      if (autoRunning) {
+        autoCPS = 0;
+        setInterval(() => {
+          cpsDisplay.innerText = autoCPS;
+          autoCPS = 0;
+        }, 100000);
+        autoClickLoop();
+        log("Started auto-clicking.");
+      } else {
+        log("Stopped auto-clicking.");
+      }
+    }
+  </script>
+
+</body>
+</html>
