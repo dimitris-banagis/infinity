@@ -2,148 +2,76 @@
 <html lang="el">
 <head>
   <meta charset="UTF-8">
-  <title>Infinity Multiplier with Speed</title>
+  <title>ΑΠΕΙΡΟ CLICKER</title>
   <style>
     body {
-      font-family: monospace;
-      background-color: #000;
+      background: #000;
       color: #0f0;
+      font-family: monospace;
       text-align: center;
-      padding-top: 100px;
+      padding-top: 50px;
     }
-    #number {
-      font-size: 60px;
-      margin-bottom: 20px;
-    }
-    #status {
-      font-size: 20px;
-      color: #0ff;
-      margin: 10px 0;
-    }
-    input {
-      font-size: 18px;
-      padding: 5px;
-      width: 180px;
-      margin: 5px;
-      text-align: center;
-    }
-    button {
-      font-size: 20px;
+    button, input {
       margin: 10px;
-      padding: 15px 30px;
-      background-color: #0f0;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    button:hover {
-      background-color: #0c0;
+      padding: 10px 20px;
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
-  <div id="number">1</div>
+  <h1>∞ AUTOCLICK MULTIPLIER</h1>
+  <h2 id="counter">1</h2>
 
-  <button onclick="multiply()">×2</button>
-  <button onclick="divide()">÷2</button>
-  <button onclick="reset()">Reset</button>
-  <button onclick="save()">💾 Save</button>
-  <button onclick="load()">📂 Load</button>
+  <button onclick="clickOnce()">CLICK</button>
+  <button onclick="doubleNow()">×2</button>
+  <button onclick="reset()">RESET</button>
   <br>
-  <input id="fpsInput" type="number" min="1" max="1000000" step="1" value="1000">
-  πολλαπλασιασμοί / δευτερόλεπτο
-  <button onclick="toggleAuto()">⏱ Auto ×2</button>
-
-  <div id="status">Auto OFF</div>
+  <button onclick="startInfiniteAutoClick()">AUTOCLICK (NO LIMIT)</button>
+  <button onclick="stopAutoClick()">STOP</button>
 
   <script>
-    let current = 1;
-    let autoRunning = false;
-    let lastTime = 0;
-    let intervalMs = 1;
+    let number = 1n;
+    let autoClicking = false;
 
-    function formatNumber(num) {
-      if (num < 1e3) return num;
-      if (num < 1e6) return (num / 1e3).toFixed(2) + " thousand";
-      if (num < 1e9) return (num / 1e6).toFixed(2) + " million";
-      if (num < 1e12) return (num / 1e9).toFixed(2) + " billion";
-      if (num < 1e15) return (num / 1e12).toFixed(2) + " trillion";
-      if (num < 1e18) return (num / 1e15).toFixed(2) + " quadrillion";
-      if (num < 1e21) return (num / 1e18).toFixed(2) + " quintillion";
-      return num.toExponential(3);
+    function update() {
+      document.getElementById('counter').innerText = number.toString();
     }
 
-    function updateDisplay() {
-      document.getElementById("number").innerText = formatNumber(current);
+    function clickOnce() {
+      number *= 2n;
+      update();
     }
 
-    function multiply() {
-      current *= 2;
-      updateDisplay();
-    }
-
-    function divide() {
-      current /= 2;
-      updateDisplay();
+    function doubleNow() {
+      number *= 2n;
+      update();
     }
 
     function reset() {
-      current = 1;
-      updateDisplay();
+      number = 1n;
+      update();
     }
 
-    function save() {
-      localStorage.setItem("savedValue", current);
-      alert("Αποθηκεύτηκε!");
+    function startInfiniteAutoClick() {
+      autoClicking = true;
+      autoClick();
     }
 
-    function load() {
-      const saved = localStorage.getItem("savedValue");
-      if (saved !== null) {
-        current = parseFloat(saved);
-        updateDisplay();
-        alert("Φορτώθηκε!");
-      } else {
-        alert("Δεν υπάρχει αποθηκευμένη τιμή.");
-      }
+    function autoClick() {
+      if (!autoClicking) return;
+      number *= 2n;
+      update();
+      // Χρήση requestIdleCallback για όσο πιο συχνά γίνεται χωρίς να "κολλάει"
+      requestIdleCallback(autoClick);
     }
 
-    function autoLoop(time) {
-      if (!autoRunning) return;
-      if (time - lastTime >= intervalMs) {
-        multiply();
-        lastTime = time;
-      }
-      requestAnimationFrame(autoLoop);
+    function stopAutoClick() {
+      autoClicking = false;
     }
-
-    function toggleAuto() {
-      const status = document.getElementById("status");
-      const fpsInput = document.getElementById("fpsInput");
-      let fps = parseFloat(fpsInput.value);
-
-      if (isNaN(fps) || fps < 1) {
-        alert("Εισάγετε αριθμό ≥ 1");
-        return;
-      }
-
-      intervalMs = 1000 / fps;
-
-      if (!autoRunning) {
-        autoRunning = true;
-        lastTime = performance.now();
-        requestAnimationFrame(autoLoop);
-        status.innerText = `Auto ON: ${fps}x ανά δευτερόλεπτο`;
-      } else {
-        autoRunning = false;
-        status.innerText = "Auto OFF";
-      }
-    }
-
-    window.onload = load;
   </script>
 
 </body>
